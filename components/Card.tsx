@@ -11,7 +11,8 @@ const Card = ({ children }: Props) => {
 
 const styles = StyleSheet.create({
   card: {
-    maxWidth: "80%",
+    minWidth: "50%",
+    maxWidth: "90%",
     alignItems: "center",
     shadowColor: "black",
     shadowOffset: { width: 0, height: 2 },

@@ -5,8 +5,11 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Dimensions,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { colors } from "../constants/colors";
 
 import Card from "../components/Card";
@@ -15,13 +18,18 @@ import Number from "../components/Number";
 import Typography from "../components/Typography";
 import MainButton from "../components/MainButton";
 
+import useOrientation from "../hooks/useOrientation";
+
 interface Props {
   onStartGame: (selectedNum: number) => void;
 }
+
 const StartGameScreen = ({ onStartGame }: Props) => {
+  const orientation = useOrientation();
   const [enteredValue, setEnteredValue] = useState("");
   const [confirmed, setConfirmed] = useState(false);
   const [selectedNumber, setSelectedNumber] = useState<number>(0);
+
   const numberInputHandler = (inputText: string) => {
     setEnteredValue(inputText.replace(/[^0-9]/g, ""));
   };
@@ -45,6 +53,7 @@ const StartGameScreen = ({ onStartGame }: Props) => {
     setSelectedNumber(chosenNumber);
     setEnteredValue("");
   };
+
   let confirmedOutput;
   if (confirmed) {
     confirmedOutput = (
@@ -59,37 +68,41 @@ const StartGameScreen = ({ onStartGame }: Props) => {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <View style={styles.screen}>
-        <Typography style={styles.title}>Start Game</Typography>
-        <View style={styles.cardWrapper}>
-          <Card>
-            <Typography>Select a Number</Typography>
-            <Input
-              numberInputHandler={numberInputHandler}
-              value={enteredValue}
-            />
-            <View style={styles.buttonContainer}>
-              <View style={styles.button}>
-                <Button
-                  title="Reset"
-                  onPress={resetInputHandler}
-                  color={colors.accent}
+    <ScrollView>
+      <KeyboardAvoidingView behavior="position">
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+          <View style={styles.screen}>
+            <Typography style={styles.title}>Start Game</Typography>
+            <View style={styles.cardWrapper}>
+              <Card>
+                <Typography>Select a Number</Typography>
+                <Input
+                  numberInputHandler={numberInputHandler}
+                  value={enteredValue}
                 />
-              </View>
-              <View style={styles.button}>
-                <Button
-                  title="Confirm"
-                  onPress={confirmInputHandler}
-                  color={colors.primary}
-                />
-              </View>
+                <View style={styles.buttonContainer}>
+                  <View style={{ width: orientation.width / 4 }}>
+                    <Button
+                      title="Reset"
+                      onPress={resetInputHandler}
+                      color={colors.accent}
+                    />
+                  </View>
+                  <View style={{ width: orientation.width / 4 }}>
+                    <Button
+                      title="Confirm"
+                      onPress={confirmInputHandler}
+                      color={colors.primary}
+                    />
+                  </View>
+                </View>
+              </Card>
             </View>
-          </Card>
-        </View>
-        <View style={styles.cardWrapper}>{confirmedOutput}</View>
-      </View>
-    </TouchableWithoutFeedback>
+            <View style={styles.cardWrapper}>{confirmedOutput}</View>
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </ScrollView>
   );
 };
 
@@ -112,10 +125,7 @@ const styles = StyleSheet.create({
     width: "100%",
     paddingHorizontal: 15,
   },
-  button: {
-    width: 100,
-  },
   cardWrapper: {
-    marginTop: 20,
+    marginVertical: 20,
   },
 });

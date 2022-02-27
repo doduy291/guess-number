@@ -6,6 +6,8 @@ import Number from "../components/Number";
 import Card from "../components/Card";
 import Typography from "../components/Typography";
 import MainButton from "../components/MainButton";
+import useOrientation from "../hooks/useOrientation";
+
 interface Props {
   userChoice: number;
   onGameOver: (numOfRounds: number) => void;
@@ -25,11 +27,13 @@ const generateRandomBetween = (
   }
 };
 const GameScreen = ({ userChoice, onGameOver }: Props) => {
+  const orientation = useOrientation();
   const initialNumber = generateRandomBetween(1, 100, userChoice);
   const [currentGuess, setCurrentGuess] = useState(initialNumber);
   const [pastGuess, setPastGuess] = useState<Array<number>>([initialNumber]);
   const currentLow = useRef(1);
   const currentHigh = useRef(100);
+
   const nextGuessHandler = (direction: string) => {
     if (
       (direction === "lower" && currentGuess < userChoice) ||
@@ -51,7 +55,6 @@ const GameScreen = ({ userChoice, onGameOver }: Props) => {
       currentGuess
     );
     setCurrentGuess(nextNumber);
-    // setRounds((currentState) => currentState + 1);
     setPastGuess((currentState) => [nextNumber, ...currentState]);
   };
 
@@ -60,17 +63,64 @@ const GameScreen = ({ userChoice, onGameOver }: Props) => {
       onGameOver(pastGuess.length);
     }
   }, [currentGuess, userChoice, onGameOver]);
+
+  if (!orientation.isPortait) {
+    return (
+      <View style={styles.screen}>
+        <Typography>Opponent's Guess</Typography>
+
+        <View style={styles.buttonContainerLandscape}>
+          <MainButton onPress={nextGuessHandler.bind(this, "lower")}>
+            <Ionicons
+              name="md-remove"
+              size={orientation.width <= 320 ? 15 : 24}
+              color="white"
+            />
+          </MainButton>
+          <Number>{currentGuess}</Number>
+
+          <MainButton onPress={nextGuessHandler.bind(this, "greater")}>
+            <Ionicons
+              name="md-add"
+              size={orientation.width <= 320 ? 15 : 24}
+              color="white"
+            />
+          </MainButton>
+        </View>
+
+        <View style={styles.list}>
+          <ScrollView>
+            {pastGuess.map((pastNum, i) => (
+              <View key={i} style={styles.listItem}>
+                <Typography>Round: #{pastGuess.length - i}</Typography>
+                <Typography>{pastNum}</Typography>
+              </View>
+            ))}
+          </ScrollView>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.screen}>
       <Typography>Opponent's Guess</Typography>
       <Number>{currentGuess}</Number>
       <Card>
-        <View style={styles.buttonContainer}>
+        <View style={styles.buttonContainerPortrait}>
           <MainButton onPress={nextGuessHandler.bind(this, "lower")}>
-            <Ionicons name="md-remove" size={24} color="white" />
+            <Ionicons
+              name="md-remove"
+              size={orientation.width <= 320 ? 15 : 24}
+              color="white"
+            />
           </MainButton>
           <MainButton onPress={nextGuessHandler.bind(this, "greater")}>
-            <Ionicons name="md-add" size={24} color="white" />
+            <Ionicons
+              name="md-add"
+              size={orientation.width <= 320 ? 15 : 24}
+              color="white"
+            />
           </MainButton>
         </View>
       </Card>
@@ -96,11 +146,17 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: "center",
   },
-  buttonContainer: {
+  buttonContainerPortrait: {
     flexDirection: "row",
     justifyContent: "space-around",
-    width: 400,
+    width: 300,
     maxWidth: "90%",
+  },
+  buttonContainerLandscape: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    width: "80%",
   },
   list: {
     flex: 1,
